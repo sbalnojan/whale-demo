@@ -1,0 +1,49 @@
+containers:
+  my_rust_container:
+    build_directory: ./RustPythonImage
+  my_rust_container_w_config:
+    build_directory: ./RustPythonImage
+    volumes:
+      - local: ./connections/
+        container: /root/.whale/config/
+        options: cached
+  my_postgres:
+    image: postgres:13.1
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test_pwd
+      POSTGRES_DB: postgres
+
+tasks:
+  shell:
+    description: Start a shell in the development environment.
+    group: Utility tasks
+    dependencies:
+      - my_postgres
+    run:
+      container: my_rust_container
+      command: bin/sh
+
+  run_init:
+    description: Type through the prompt; URL is "my_postgres", ...
+    group: Utility tasks
+    dependencies:
+      - my_postgres
+    run:
+      container: my_rust_container
+      command: bin/sh
+      #  Run alias wh=~/.whale/bin/whale
+      #  Then wh init to init stuff!
+
+  run_etl:
+    description: Starts the etl process, then simply use "wh" to search through the system tables...
+    group: Utility tasks
+    dependencies:
+      - my_postgres
+    run:
+      container: my_rust_container_w_config
+      command: bin/sh
+      #  Run alias wh=~/.whale/bin/whale
+      #  Then wh etl
