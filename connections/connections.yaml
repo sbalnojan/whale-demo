@@ -1,3 +1,4 @@
+name: d
 metadata_source: Postgres
 uri: my_postgres
 port: 5432
