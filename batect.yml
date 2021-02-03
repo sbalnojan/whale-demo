@@ -4,8 +4,11 @@ containers:
   my_rust_container_w_config:
     build_directory: ./whaleimage
     volumes:
-      - local: ./connections/
-        container: /root/.whale/config/
+      - local: ./connections/connections.yaml
+        container: /root/.whale/config/connections.yaml
+        options: cached
+      - local: ./manifests
+        container: /root/.whale/manifests
         options: cached
   my_postgres:
     image: postgres:13.1
@@ -25,20 +28,31 @@ tasks:
     run:
       container: my_rust_container
       command: bin/sh
+      # Run alias wh=~/.whale/bin/whale; then wh init or wh etl or ... play around.
 
   run_init:
-    description: Type through the prompt; URL is "my_postgres", ...
+    description: Type through the prompt; URL is "my_postgres", everything else you can see in this config.
     group: Utility tasks
     dependencies:
       - my_postgres
     run:
       container: my_rust_container
-      command: bin/sh
-      #  Run alias wh=~/.whale/bin/whale
-      #  Then wh init to init stuff!
+      command: bin/sh -c "~/.whale/bin/whale init"
+      #  Run alias wh=~/.whale/bin/whale to get the alias...
 
   run_etl:
-    description: Starts the etl process, then simply use "wh" to search through the system tables...
+    description: Loads config file from here so you can kick off the etl process...
+    group: Utility tasks
+    dependencies:
+      - my_postgres
+    run:
+      container: my_rust_container_w_config
+      command: bin/sh -c "~/.whale/bin/whale etl"
+      #  Run alias wh=~/.whale/bin/whale
+      #  Then wh etl
+
+  run_everything:
+    description: Loads config file; now create alias, then ETL and then use wh to search!
     group: Utility tasks
     dependencies:
       - my_postgres
