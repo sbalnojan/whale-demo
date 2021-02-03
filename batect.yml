@@ -1,8 +1,8 @@
 containers:
   my_rust_container:
-    build_directory: ./RustPythonImage
+    build_directory: ./whaleimage
   my_rust_container_w_config:
-    build_directory: ./RustPythonImage
+    build_directory: ./whaleimage
     volumes:
       - local: ./connections/
         container: /root/.whale/config/
